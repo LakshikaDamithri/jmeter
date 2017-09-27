@@ -18,6 +18,8 @@
 
 package org.apache.jorphan.math;
 
+//https://commons.apache.org/proper/commons-math/javadocs/api-3.0/org/apache/commons/math3/stat/descriptive/rank/Percentile.html
+
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +38,7 @@ import org.apache.commons.lang3.mutable.MutableLong;
 public abstract class StatCalculator<T extends Number & Comparable<? super T>> {
 
     // key is the type to collect (usually long), value = count of entries
-    private final Map<T, MutableLong> valuesMap = new TreeMap<>();
+    private final Map<Double, MutableLong> valuesMap = new TreeMap<>();
     // We use a TreeMap because we need the entries to be sorted
 
     // Running values, updated for each sample
@@ -50,19 +52,19 @@ public abstract class StatCalculator<T extends Number & Comparable<? super T>> {
 
     private long count = 0;
 
-    private T min;
+    private double min;
 
-    private T max;
+    private double max;
 
     private long bytes = 0;
     
     private long sentBytes = 0;
 
-    private final T ZERO;
+    private final double ZERO;
 
-    private final T MAX_VALUE; // e.g. Long.MAX_VALUE
+    private final double MAX_VALUE; // e.g. Long.MAX_VALUE
 
-    private final T MIN_VALUE; // e.g. Long.MIN_VALUE
+    private final double MIN_VALUE; // e.g. Long.MIN_VALUE
 
     /**
      * This constructor is used to set up particular values for the generic class instance.
@@ -71,7 +73,7 @@ public abstract class StatCalculator<T extends Number & Comparable<? super T>> {
      * @param min - value to return for minimum if there are no values
      * @param max - value to return for maximum if there are no values
      */
-    public StatCalculator(final T zero, final T min, final T max) {
+    public StatCalculator(final double zero, final double min, final double max) {
         super();
         ZERO = zero;
         MAX_VALUE = max;
@@ -109,13 +111,13 @@ public abstract class StatCalculator<T extends Number & Comparable<? super T>> {
         sentBytes += newValue;
     }
 
-    public void addAll(StatCalculator<T> calc) {
-        for(Entry<T, MutableLong> ent : calc.valuesMap.entrySet()) {
+    public void addAll(StatCalculator<Double> calc) {
+        for(Entry<Double, MutableLong> ent : calc.valuesMap.entrySet()) {
             addEachValue(ent.getKey(), ent.getValue().longValue());
         }
     }
 
-    public T getMedian() {
+    public double getMedian() {
         return getPercentPoint(0.5);
     }
 
@@ -138,7 +140,7 @@ public abstract class StatCalculator<T extends Number & Comparable<? super T>> {
      *            and <code>1.0</code>)
      * @return number of values less than the percentage
      */
-    public T getPercentPoint(float percent) {
+    public double getPercentPoint(float percent) {
         return getPercentPoint((double) percent);
     }
 
@@ -153,23 +155,50 @@ public abstract class StatCalculator<T extends Number & Comparable<? super T>> {
      *            and <code>1.0</code>)
      * @return the value which %percent% of the values are less than
      */
-    public T getPercentPoint(double percent) {
+    public double getPercentPoint(double percent) {
         if (count <= 0) {
                 return ZERO;
         }
-        if (percent >= 1.0) {
-            return getMax();
-        }
+//        if (percent >= 1.0) {
+//            return getMax();
+//        }
 
         // use Math.round () instead of simple (long) to provide correct value rounding
-        long target = Math.round (count * percent);
+        //long target = Math.round (count * percent);
+
+        double pos = percent*(count +1);
+        double dif = pos - Math.floor(pos);
+        double L = Math.floor(pos);
+        double lower = ZERO ;
+        double upper = ZERO ;
+        double ret_val;
+        int check=0;
+
+        if (pos<1) return getMin();
+        if (pos >= count) return  getMax();
+
         try {
-            for (Entry<T, MutableLong> val : valuesMap.entrySet()) {
-                target -= val.getValue().longValue();
-                if (target <= 0){
-                    return val.getKey();
+            for (Entry<Double, MutableLong> entry : valuesMap.entrySet()) {
+
+                if(check == 1){
+                    upper = entry.getKey();
+                    break;
+                }
+
+                L -= entry.getValue().longValue();
+
+                if (L == 0){
+                    check = check + 1;
+                    lower = entry.getKey();
+                } else if ( L < 0){
+                    lower = entry.getKey();
+                    upper = entry.getKey();
+                    break;
                 }
             }
+            ret_val = lower+dif*(upper-lower);
+            return ret_val;
+
         } catch (ConcurrentModificationException ignored) {
             // ignored. May happen occasionally, but no harm done if so.
         }
@@ -185,7 +214,7 @@ public abstract class StatCalculator<T extends Number & Comparable<? super T>> {
     public Map<Number, Number[]> getDistribution() {
         Map<Number, Number[]> items = new HashMap<>();
 
-        for (Entry<T, MutableLong> entry : valuesMap.entrySet()) {
+        for (Entry<Double, MutableLong> entry : valuesMap.entrySet()) {
             Number[] dis = new Number[2];
             dis[0] = entry.getKey();
             dis[1] = entry.getValue();
@@ -202,11 +231,11 @@ public abstract class StatCalculator<T extends Number & Comparable<? super T>> {
         return deviation;
     }
 
-    public T getMin() {
+    public double getMin() {
         return min;
     }
 
-    public T getMax() {
+    public double getMax() {
         return max;
     }
 
@@ -218,9 +247,9 @@ public abstract class StatCalculator<T extends Number & Comparable<? super T>> {
         return sum;
     }
 
-    protected abstract T divide(T val, int n);
+    protected abstract double divide(double val, int n);
 
-    protected abstract T divide(T val, long n);
+    protected abstract double divide(double val, long n);
 
     /**
      * Update the calculator with the values for a set of samples.
@@ -228,9 +257,9 @@ public abstract class StatCalculator<T extends Number & Comparable<? super T>> {
      * @param val the common value, normally the elapsed time
      * @param sampleCount the number of samples with the same value
      */
-    void addEachValue(T val, long sampleCount) {
+    void addEachValue(double val, long sampleCount) {
         count += sampleCount;
-        double currentVal = val.doubleValue();
+        double currentVal = val;
         sum += currentVal * sampleCount;
         // For n same values in sum of square is equal to n*val^2
         sumOfSquares += currentVal * currentVal * sampleCount;
@@ -244,11 +273,11 @@ public abstract class StatCalculator<T extends Number & Comparable<? super T>> {
      * @param val the aggregate value, normally the elapsed time
      * @param sampleCount the number of samples contributing to the aggregate value
      */
-    public void addValue(T val, long sampleCount) {
+    public void addValue(double val, long sampleCount) {
         count += sampleCount;
-        double currentVal = val.doubleValue();
+        double currentVal = val;
         sum += currentVal;
-        T actualValue = val;
+        double actualValue = val;
         if (sampleCount > 1){
             // For n values in an aggregate sample the average value = (val/n)
             // So need to add n * (val/n) * (val/n) = val * val / n
@@ -261,13 +290,13 @@ public abstract class StatCalculator<T extends Number & Comparable<? super T>> {
         calculateDerivedValues(actualValue);
     }
 
-    private void calculateDerivedValues(T actualValue) {
+    private void calculateDerivedValues(double actualValue) {
         mean = sum / count;
         deviation = Math.sqrt((sumOfSquares / count) - (mean * mean));
-        if (actualValue.compareTo(max) > 0){
+        if (actualValue> max){
             max=actualValue;
         }
-        if (actualValue.compareTo(min) < 0){
+        if (actualValue < min){
             min=actualValue;
         }
     }
@@ -278,11 +307,11 @@ public abstract class StatCalculator<T extends Number & Comparable<? super T>> {
      * @param val the value to add, which should correspond with a single sample
      * @see #addValue(Number, long)
      */
-    public void addValue(T val) {
+    public void addValue(double val) {
         addValue(val, 1L);
     }
 
-    private void updateValueCount(T actualValue, long sampleCount) {
+    private void updateValueCount(double actualValue, long sampleCount) {
         MutableLong count = valuesMap.get(actualValue);
         if (count != null) {
             count.add(sampleCount);
