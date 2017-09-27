@@ -21,7 +21,7 @@ package org.apache.jorphan.math;
 /**
  * StatCalculator for Long values
  */
-public class StatCalculatorLong extends StatCalculator<Long> {
+public class StatCalculatorLong extends StatCalculator<Double> {
 
     public StatCalculatorLong() {
         super(Long.valueOf(0L), Long.valueOf(Long.MIN_VALUE), Long.valueOf(Long.MAX_VALUE));
@@ -47,12 +47,12 @@ public class StatCalculatorLong extends StatCalculator<Long> {
     }
 
     @Override
-    protected Long divide(Long val, int n) {
-        return Long.valueOf(val.longValue() / n);
+    protected double divide(double val, int n) {
+        return (val / n);
     }
 
     @Override
-    protected Long divide(Long val, long n) {
-        return Long.valueOf(val.longValue() / n);
+    protected double divide(double val, long n) {
+        return(val / n);
     }
 }
