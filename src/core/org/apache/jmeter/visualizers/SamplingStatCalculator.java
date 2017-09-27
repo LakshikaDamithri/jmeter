@@ -73,7 +73,7 @@ public class SamplingStatCalculator {
      *
      * @return how long the samples took
      */
-    public long getElapsed() {
+    public double getElapsed() {
         if (getCurrentSample().getEndTime() == 0) {
             return 0;// No samples collected ...
         }
@@ -177,13 +177,13 @@ public class SamplingStatCalculator {
      *
      */
     public Sample addSample(SampleResult res) {
-        long rtime;
-        long cmean;
-        long cstdv;
-        long cmedian;
-        long cpercent;
-        long eCount;
-        long endTime;
+        double rtime;
+        double cmean;
+        double cstdv;
+        double cmedian;
+        double cpercent;
+        double eCount;
+        double endTime;
         double throughput;
         boolean rbool;
         synchronized (calculator) {
@@ -194,17 +194,17 @@ public class SamplingStatCalculator {
             eCount = getCurrentSample().getErrorCount();
             eCount += res.getErrorCount();
             endTime = getEndTime(res);
-            long howLongRunning = endTime - firstTime;
+            double howLongRunning = endTime - firstTime;
             throughput = ((double) calculator.getCount() / (double) howLongRunning) * 1000.0;
             if (throughput > maxThroughput) {
                 maxThroughput = throughput;
             }
 
             rtime = res.getTime();
-            cmean = (long)calculator.getMean();
-            cstdv = (long)calculator.getStandardDeviation();
-            cmedian = calculator.getMedian().longValue();
-            cpercent = calculator.getPercentPoint( 0.500 ).longValue();
+            cmean = calculator.getMean();
+            cstdv = calculator.getStandardDeviation();
+            cmedian = calculator.getMedian();
+            cpercent = calculator.getPercentPoint( 0.500 );
 // TODO cpercent is the same as cmedian here - why? and why pass it to "distributionLine"?
             rbool = res.isSuccessful();
         }
@@ -216,9 +216,9 @@ public class SamplingStatCalculator {
         return s;
     }
 
-    private long getEndTime(SampleResult res) {
-        long endTime = res.getEndTime();
-        long lastTime = getCurrentSample().getEndTime();
+    private double getEndTime(SampleResult res) {
+        double endTime = res.getEndTime();
+        double lastTime = getCurrentSample().getEndTime();
         if (lastTime < endTime) {
             lastTime = endTime;
         }
@@ -272,7 +272,7 @@ public class SamplingStatCalculator {
     /**
      * @return errorCount
      */
-    public long getErrorCount() {
+    public double getErrorCount() {
         return getCurrentSample().getErrorCount();
     }
 
@@ -312,7 +312,7 @@ public class SamplingStatCalculator {
     }
 
     public Number getMin() {
-        if (calculator.getMin().longValue() < 0) {
+        if (calculator.getMin() < 0) {
             return Long.valueOf(0);
         }
         return calculator.getMin();
