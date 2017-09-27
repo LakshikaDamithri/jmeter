@@ -25,19 +25,19 @@ import java.util.Date;
 public class Sample implements Serializable, Comparable<Sample> {
     private static final long serialVersionUID = 240L;
 
-    private final long data; // = elapsed
+    private final double data; // = elapsed
 
-    private final long average;
+    private final double average;
 
-    private final long median;
+    private final double median;
 
-    private final long distributionLine; // TODO: what is this for?
+    private final double distributionLine; // TODO: what is this for?
 
-    private final long deviation;
+    private final double deviation;
 
     private final double throughput;
 
-    private final long errorCount;
+    private final double errorCount;
 
     private final boolean success;
 
@@ -45,14 +45,14 @@ public class Sample implements Serializable, Comparable<Sample> {
 
     private final String threadName;
 
-    private final long count;
+    private final double count;
 
-    private final long endTime;
+    private final double endTime;
 
     private final int bytes;
 
-    public Sample(String name, long data, long average, long deviation, long median, long distributionLine,
-            double throughput, long errorCount, boolean success, long num, long endTime) {
+    public Sample(String name, double data, double average, double deviation, double median, double distributionLine,
+            double throughput, double errorCount, boolean success, double num, double endTime) {
         this.data = data;
         this.average = average;
         this.deviation = deviation;
@@ -97,35 +97,35 @@ public class Sample implements Serializable, Comparable<Sample> {
     /**
      * @return Returns the average.
      */
-    public long getAverage() {
+    public double getAverage() {
         return average;
     }
 
     /**
      * @return Returns the count.
      */
-    public long getCount() {
+    public double getCount() {
         return count;
     }
 
     /**
      * @return Returns the data (usually elapsed time)
      */
-    public long getData() {
+    public double getData() {
         return data;
     }
 
     /**
      * @return Returns the deviation.
      */
-    public long getDeviation() {
+    public double getDeviation() {
         return deviation;
     }
 
     /**
      * @return Returns the distributionLine.
      */
-    public long getDistributionLine() {
+    public double getDistributionLine() {
         return distributionLine;
     }
 
@@ -139,7 +139,7 @@ public class Sample implements Serializable, Comparable<Sample> {
     /**
      * @return Returns the errorCount.
      */
-    public long getErrorCount() {
+    public double getErrorCount() {
         return errorCount;
     }
 
@@ -160,7 +160,7 @@ public class Sample implements Serializable, Comparable<Sample> {
     /**
      * @return Returns the median.
      */
-    public long getMedian() {
+    public double getMedian() {
         return median;
     }
 
@@ -174,7 +174,7 @@ public class Sample implements Serializable, Comparable<Sample> {
     /** {@inheritDoc} */
     @Override
     public int compareTo(Sample otherSample) {
-        return Long.compare(count, otherSample.count);
+        return Double.compare(count, otherSample.count);
     }
 
     // TODO should equals and hashCode depend on field other than count?
@@ -187,20 +187,20 @@ public class Sample implements Serializable, Comparable<Sample> {
 
     @Override
     public int hashCode(){
-        return (int)(count ^ (count >>> 32));
+        return (int)((int)count ^ ((int)count >>> 32));
     }
 
     /**
      * @return Returns the endTime.
      */
-    public long getEndTime() {
+    public double getEndTime() {
         return endTime;
     }
 
     /**
      * @return Returns the (calculated) startTime, assuming Data is the elapsed time.
      */
-    public long getStartTime() {
+    public double getStartTime() {
         return endTime-data;
     }
 
@@ -210,6 +210,6 @@ public class Sample implements Serializable, Comparable<Sample> {
      * Intended for use from Functors
      */
     public String getStartTimeFormatted(Format format) {
-        return format.format(new Date(getStartTime()));
+        return format.format(new Date((int)getStartTime()));
     }
 }
