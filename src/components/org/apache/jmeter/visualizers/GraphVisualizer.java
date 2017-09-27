@@ -149,12 +149,12 @@ public class GraphVisualizer extends AbstractVisualizer implements ImageVisualiz
             return;
         }
         graph.updateGui(s);
-        noSamplesField.setText(Long.toString(s.getCount()));
-        dataField.setText(Long.toString(s.getData()));
-        averageField.setText(Long.toString(s.getAverage()));
-        deviationField.setText(Long.toString(s.getDeviation()));
+        noSamplesField.setText(Long.toString((long) s.getCount()));
+        dataField.setText(Long.toString((long) s.getData()));
+        averageField.setText(Long.toString((long) s.getAverage()));
+        deviationField.setText(Long.toString((long) s.getDeviation()));
         throughputField.setText(nf.format(60 * s.getThroughput()) + "/" + minute); // $NON-NLS-1$
-        medianField.setText(Long.toString(s.getMedian()));
+        medianField.setText(Long.toString((long) s.getMedian()));
         updateYAxis();
     }
 
