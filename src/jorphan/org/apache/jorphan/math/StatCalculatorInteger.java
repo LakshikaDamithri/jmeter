@@ -21,7 +21,7 @@ package org.apache.jorphan.math;
 /**
  * StatCalculator for Integer values
  */
-public class StatCalculatorInteger extends StatCalculator<Integer> {
+public class StatCalculatorInteger extends StatCalculator<Double> {
 
     public StatCalculatorInteger() {
         super(Integer.valueOf(0), Integer.valueOf(Integer.MIN_VALUE), Integer.valueOf(Integer.MAX_VALUE));
@@ -42,12 +42,12 @@ public class StatCalculatorInteger extends StatCalculator<Integer> {
     }
 
     @Override
-    protected Integer divide(Integer val, int n) {
-        return Integer.valueOf(val.intValue() / n);
+    protected double divide(double val, int n) {
+        return (val / n);
     }
 
     @Override
-    protected Integer divide(Integer val, long n) {
-        return Integer.valueOf((int) (val.intValue() / n));
+    protected double divide(double val, long n) {
+        return ((val/ n));
     }
 }
